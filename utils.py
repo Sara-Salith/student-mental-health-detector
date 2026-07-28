@@ -4,6 +4,8 @@ from google import genai
 import streamlit as st
 import re
 
+from google.genai.errors import ServerError
+
 # -----------------------------
 # Load ML Model
 # -----------------------------
@@ -85,6 +87,9 @@ def predict(data):
 # Gemini Recommendation
 # -----------------------------
 
+from google.genai.errors import ServerError
+import time
+
 def ai_recommendation(data, prediction):
 
     status = "High Risk" if prediction == 1 else "Low Risk"
@@ -124,7 +129,7 @@ Return your response in Markdown using the following headings:
 
 # 💪 Daily Motivation
 
-Keep the tone supportive, encouraging, and easy to understand.
+Keep the tone supportive.
 
 Limit the response to about 200 words.
 
@@ -132,11 +137,38 @@ Do not diagnose the student.
 
 Avoid repeating the prediction.
 
-Focus on practical, personalized suggestions.
+Focus on practical suggestions.
 """
-    response = client.models.generate_content(
-        model="models/gemini-3.5-flash",
-        contents=prompt
-    )
 
-    return response.text
+    for attempt in range(3):
+
+        try:
+
+            response = client.models.generate_content(
+                model="models/gemini-flash-latest",
+                contents=prompt
+            )
+
+            if response.text:
+                return response.text
+
+        except ServerError:
+
+            if attempt < 2:
+                time.sleep(5)
+
+    return """
+## 🌟 AI Recommendation
+
+Google Gemini is currently experiencing high demand.
+
+Please try again after a few minutes.
+
+Meanwhile:
+
+- Get enough sleep.
+- Stay hydrated.
+- Take regular study breaks.
+- Talk to someone you trust if you feel overwhelmed.
+- Remember this prediction is only an educational assessment.
+"""
