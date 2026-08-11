@@ -1,0 +1,3 @@
+username,timestamp,prediction,risk_score,Gender,Age,Academic Pressure,Work Pressure,CGPA,Study Satisfaction,Job Satisfaction,Sleep Duration,Dietary Habits,Suicidal Thoughts,Work/Study Hours,Financial Stress,Family History
+sara,2026-08-10 23:43:25,Higher Mental Health Risk,97.77020174132552,Male,20,3.0,3.0,7.0,3.0,3.0,Less than 5 hours,Healthy,Yes,6,3.0,Yes
+sara,2026-08-11 12:32:30,Higher Mental Health Risk,58.022966049402136,Male,20,3.0,3.5,7.0,3.5,3.0,5-6 hours,Moderate,No,4,3.5,No
