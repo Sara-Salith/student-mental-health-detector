@@ -3,8 +3,10 @@ import pandas as pd
 
 from components.history import get_user_history
 from components.navigation import (
+    login_page,
     assessment_page,
-    history_page
+    history_page,
+    back_button
 )
 
 
@@ -30,6 +32,7 @@ if not st.session_state.get("logged_in", False):
 
 
 username = st.session_state.username
+back_button(login_page, "back_to_login")
 
 
 # ==================================================
@@ -640,21 +643,22 @@ with col4:
 
 
 # ==================================================
-# TREND + QUICK ACTIONS
+# MAIN DASHBOARD CONTENT
 # ==================================================
 
-st.write("")
-
-trend_col, action_col = st.columns(
-    [2.1, 1]
-)
+left_col, right_col = st.columns([2.1, 1], gap="large")
 
 
 # ==================================================
-# TREND
+# LEFT COLUMN
+# TREND + WELLNESS
 # ==================================================
 
-with trend_col:
+with left_col:
+
+    # ----------------------------------------------
+    # MENTAL HEALTH TREND
+    # ----------------------------------------------
 
     render_html(
         '<div class="section-title">📈 Mental Health Trend</div>'
@@ -704,122 +708,17 @@ with trend_col:
     )
 
 
-# ==================================================
-# QUICK ACTIONS
-# ==================================================
+    # ----------------------------------------------
+    # TODAY'S WELLNESS TIPS
+    # ----------------------------------------------
 
-with action_col:
-
-    render_html(
-        '<div class="section-title">⚡ Quick Actions</div>'
-    )
-
-
-    render_html(
-        """
-        <div class="action-card action-blue">
-
-            <div class="action-title">
-                🧠 Start Assessment
-            </div>
-
-            <div class="action-text">
-                Take a new mental wellness assessment and get an updated AI-powered analysis.
-            </div>
-
-        </div>
-        """
-    )
-
-    if st.button(
-        "Start Assessment  →",
-        key="action_assessment",
-        use_container_width=True
-    ):
-
-        st.switch_page(assessment_page)
-
-
-    st.write("")
-
-
-    render_html(
-        """
-        <div class="action-card action-green">
-
-            <div class="action-title">
-                📊 View History
-            </div>
-
-            <div class="action-text">
-                Review your previous assessments, results and risk scores.
-            </div>
-
-        </div>
-        """
-    )
-
-    if st.button(
-        "View History  →",
-        key="action_history",
-        use_container_width=True
-    ):
-
-        st.switch_page(history_page)
-
-
-    st.write("")
-
-
-    render_html(
-        """
-        <div class="action-card action-yellow">
-
-            <div class="action-title">
-                💡 Wellness Tips
-            </div>
-
-            <div class="action-text">
-                Get personalized suggestions based on your recent mental wellness status.
-            </div>
-
-        </div>
-        """
-    )
-
-    if st.button(
-        "View Tips  →",
-        key="action_tips",
-        use_container_width=True
-    ):
-
-        st.info(
-            "Complete an assessment to receive personalized AI wellness recommendations."
-        )
-
-
-# ==================================================
-# WELLNESS + RECENT ASSESSMENT
-# ==================================================
-
-st.write("")
-
-tips_col, recent_col = st.columns(
-    [2, 1]
-)
-
-
-# ==================================================
-# WELLNESS TIPS
-# ==================================================
-
-with tips_col:
+    st.markdown("<div style='height:25px'></div>", unsafe_allow_html=True)
 
     render_html(
         '<div class="section-title">💡 Today\'s Wellness Tips</div>'
     )
 
-    tip1, tip2, tip3 = st.columns(3)
+    tip1, tip2, tip3 = st.columns(3, gap="medium")
 
 
     with tip1:
@@ -880,10 +779,115 @@ with tips_col:
 
 
 # ==================================================
-# RECENT ASSESSMENT
+# RIGHT COLUMN
+# QUICK ACTIONS + RECENT ASSESSMENT
 # ==================================================
 
-with recent_col:
+with right_col:
+
+    # ----------------------------------------------
+    # QUICK ACTIONS
+    # ----------------------------------------------
+
+    render_html(
+        '<div class="section-title">⚡ Quick Actions</div>'
+    )
+
+
+    render_html(
+        """
+        <div class="action-card action-blue">
+
+            <div class="action-title">
+                🧠 Start Assessment
+            </div>
+
+            <div class="action-text">
+                Take a new mental wellness assessment and get an updated AI-powered analysis.
+            </div>
+
+        </div>
+        """
+    )
+
+
+    if st.button(
+        "Start Assessment  →",
+        key="action_assessment",
+        use_container_width=True
+    ):
+
+        st.switch_page(assessment_page)
+
+
+    st.write("")
+
+
+    render_html(
+        """
+        <div class="action-card action-green">
+
+            <div class="action-title">
+                📊 View History
+            </div>
+
+            <div class="action-text">
+                Review your previous assessments, results and risk scores.
+            </div>
+
+        </div>
+        """
+    )
+
+
+    if st.button(
+        "View History  →",
+        key="action_history",
+        use_container_width=True
+    ):
+
+        st.switch_page(history_page)
+
+
+    st.write("")
+
+
+    render_html(
+        """
+        <div class="action-card action-yellow">
+
+            <div class="action-title">
+                💡 Wellness Tips
+            </div>
+
+            <div class="action-text">
+                Get personalized suggestions based on your recent mental wellness status.
+            </div>
+
+        </div>
+        """
+    )
+
+
+    if st.button(
+        "View Tips  →",
+        key="action_tips",
+        use_container_width=True
+    ):
+
+        st.info(
+            "Complete an assessment to receive personalized AI wellness recommendations."
+        )
+
+
+    # ----------------------------------------------
+    # RECENT ASSESSMENT
+    # ----------------------------------------------
+
+    st.markdown(
+        "<div style='height:25px'></div>",
+        unsafe_allow_html=True
+    )
 
     render_html(
         '<div class="section-title">🕒 Recent Assessment</div>'
@@ -953,7 +957,7 @@ with recent_col:
                 <div class="recent-row">
 
                     <span class="recent-label">
-                        %
+                        📊 Risk Score
                     </span>
 
                     <span class="{result_class}">
@@ -965,17 +969,3 @@ with recent_col:
             </div>
             """
         )
-
-
-# ==================================================
-# DISCLAIMER
-# ==================================================
-
-render_html(
-    """
-    <div class="disclaimer">
-        ℹ️ This application is intended for educational and screening
-        purposes only and does not provide a medical diagnosis.
-    </div>
-    """
-)

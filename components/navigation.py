@@ -1,6 +1,10 @@
 import streamlit as st
 
 
+# ==================================================
+# PAGE DEFINITIONS
+# ==================================================
+
 login_page = st.Page(
     "pages/1_Login_Register.py",
     title="Login / Register",
@@ -35,3 +39,17 @@ history_page = st.Page(
     url_path="history",
     icon="📋"
 )
+
+
+# ==================================================
+# BACK BUTTON
+# ==================================================
+
+def back_button(page, key):
+
+    if st.button(
+        "← Back",
+        key=key,
+        use_container_width=False
+    ):
+        st.switch_page(page)

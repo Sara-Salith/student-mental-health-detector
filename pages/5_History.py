@@ -2,6 +2,11 @@ import streamlit as st
 
 from components.history import get_user_history
 
+from components.navigation import (
+    dashboard_page,
+    back_button
+)
+
 
 
 # ==================================================
@@ -15,6 +20,8 @@ if not st.session_state.get("logged_in", False):
 
 
 username = st.session_state.username
+
+back_button(dashboard_page, "back_to_dashboard_history")
 
 
 # ==================================================

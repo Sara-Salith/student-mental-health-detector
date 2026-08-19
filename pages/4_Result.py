@@ -1,8 +1,9 @@
 import streamlit as st
 from ai_helper import get_ai_analysis
 from components.navigation import (
-    login_page,
-    assessment_page
+    assessment_page,
+    dashboard_page,
+    back_button
 )
 
 st.markdown(
@@ -46,6 +47,8 @@ if not st.session_state.logged_in:
         st.switch_page(login_page)
 
     st.stop()
+
+back_button(assessment_page, "back_to_assessment")
 
 
 # --------------------------------------------------
