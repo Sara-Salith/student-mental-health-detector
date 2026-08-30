@@ -2,6 +2,7 @@ import streamlit as st
 from ai_helper import get_ai_analysis
 from components.navigation import (
     assessment_page,
+    login_page,
     dashboard_page,
     back_button
 )
