@@ -5,7 +5,8 @@ from components.navigation import (
     dashboard_page,
     assessment_page,
     result_page,
-    history_page
+    history_page,
+    download_report_page
 )
 
 
@@ -82,7 +83,8 @@ if st.session_state.logged_in:
             dashboard_page,
             assessment_page,
             result_page,
-            history_page
+            history_page,
+            download_report_page
         ],
         position="hidden"
     )

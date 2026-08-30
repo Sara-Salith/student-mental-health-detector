@@ -4,6 +4,7 @@ from components.navigation import (
     assessment_page,
     login_page,
     dashboard_page,
+    download_report_page,
     back_button
 )
 
@@ -72,6 +73,7 @@ if "assessment_data" not in st.session_state or "prediction" not in st.session_s
 
 student_data = st.session_state.assessment_data
 prediction = st.session_state.prediction
+risk_score = st.session_state.get("risk_score", 0.0)
 
 
 # --------------------------------------------------
@@ -105,6 +107,7 @@ st.divider()
 
 st.subheader("📊 Screening Result")
 
+
 if prediction == "Higher Mental Health Risk":
 
     st.error(
@@ -127,6 +130,24 @@ else:
         "predicted risk based on the responses provided."
     )
 
+# ==================================================
+# RISK SCORE
+# ==================================================
+
+st.markdown("### Your Risk Score")
+
+risk_col1, risk_col2, risk_col3 = st.columns([1, 2, 1])
+
+with risk_col2:
+    st.metric(
+        label="Estimated Mental Health Risk",
+        value=f"{risk_score:.1f}%"
+    )
+
+st.caption(
+    "This percentage is an AI-based screening estimate and is not a medical diagnosis."
+)
+
 
 st.info(
     "This result is an AI-based screening prediction and "
@@ -142,25 +163,31 @@ st.divider()
 
 st.subheader("🤖 AI Wellness Analysis")
 
-with st.spinner("Gemini AI is analyzing your responses..."):
+# Generate analysis only once
+if "ai_result" not in st.session_state:
 
-    try:
+    with st.spinner("Gemini AI is analyzing your responses..."):
 
-        ai_result = get_ai_analysis(
-            student_data,
-            prediction
-        )
+        try:
 
-        st.write(ai_result)
+            st.session_state.ai_result = get_ai_analysis(
+                student_data,
+                prediction
+            )
 
-    except Exception as e:
+        except Exception as e:
 
-        st.error(
-            "The AI analysis could not be generated."
-        )
+            st.session_state.ai_result = (
+                "AI wellness analysis could not be generated."
+            )
 
-        st.code(str(e))
+            st.error(str(e))
 
+# Get saved analysis
+ai_result = st.session_state.ai_result
+
+# Display analysis
+st.write(ai_result)
 
 # --------------------------------------------------
 # WELLNESS DISCLAIMER
@@ -181,35 +208,96 @@ st.caption(
 
 st.divider()
 
-col1, col2 = st.columns(2)
+col1, col2, col3, col4 = st.columns(4)
+
+
+# ==================================================
+# BACK TO DASHBOARD
+# ==================================================
 
 with col1:
+
+    if st.button(
+        "🏠 Dashboard",
+        use_container_width=True
+    ):
+
+        st.switch_page(dashboard_page)
+
+
+# ==================================================
+# TAKE ASSESSMENT AGAIN
+# ==================================================
+
+with col2:
 
     if st.button(
         "🔄 Take Assessment Again",
         use_container_width=True
     ):
 
-        # Remove old result
-        st.session_state.pop("assessment_data", None)
-        st.session_state.pop("prediction", None)
+        # Start fresh assessment
+        st.session_state.assessment_step = 1
+        st.session_state.new_assessment = True
+
+        st.session_state.pop(
+            "assessment_data",
+            None
+        )
+
+        st.session_state.pop(
+            "prediction",
+            None
+        )
+
+        st.session_state.pop(
+            "risk_score",
+            None
+        )
 
         st.switch_page(assessment_page)
 
 
-with col2:
+# ==================================================
+# DOWNLOAD REPORT
+# ==================================================
+
+with col3:
+
+    if st.button(
+        "📄 Download Report",
+        use_container_width=True
+    ):
+
+        st.switch_page(download_report_page)
+
+# ==================================================
+# LOGOUT
+# ==================================================
+
+with col4:
 
     if st.button(
         "🚪 Logout",
         use_container_width=True
     ):
 
-        # Clear login information
         st.session_state.logged_in = False
         st.session_state.username = ""
 
-        # Clear assessment information
-        st.session_state.pop("assessment_data", None)
-        st.session_state.pop("prediction", None)
+        st.session_state.pop(
+            "assessment_data",
+            None
+        )
+
+        st.session_state.pop(
+            "prediction",
+            None
+        )
+
+        st.session_state.pop(
+            "risk_score",
+            None
+        )
 
         st.switch_page(login_page)

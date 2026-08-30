@@ -926,8 +926,10 @@ if st.button(
 
 
             # ==================================================
-            # RISK PROBABILITY
+            # RISK SCORE
             # ==================================================
+
+            risk_score = 0.0
 
             if hasattr(model, "predict_proba"):
 
@@ -935,34 +937,52 @@ if st.button(
                     input_data
                 )[0]
 
+                classes = list(model.classes_)
 
-                classes = list(
-                    model.classes_
-                )
+                # Find the higher-risk / depressed class safely
+                risk_index = None
 
+                for i, class_name in enumerate(classes):
 
-                if 1 in classes:
+                    if str(class_name).lower() in [
+                        "1",
+                        "yes",
+                        "depressed",
+                        "depression",
+                        "higher mental health risk"
+                    ]:
 
-                    risk_index = classes.index(1)
+                        risk_index = i
+                        break
 
-                    risk_score = (
+                if risk_index is not None:
+
+                    risk_score = float(
                         probabilities[risk_index] * 100
                     )
 
                 else:
 
-                    risk_score = (
-                        probabilities[-1] * 100
+                    st.error(
+                        f"Could not identify the higher-risk class. "
+                        f"Model classes: {classes}"
                     )
 
             else:
 
                 risk_score = (
                     100.0
-                    if prediction == 1
+                    if (
+                        prediction == 1
+                        or str(prediction).lower() in [
+                            "yes",
+                            "depressed",
+                            "depression",
+                            "1"
+                        ]
+                    )
                     else 0.0
                 )
-
 
             # ==================================================
             # READABLE PREDICTION

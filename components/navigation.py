@@ -40,6 +40,13 @@ history_page = st.Page(
     icon="📋"
 )
 
+download_report_page = st.Page(
+    "pages/6_Download_Report.py",
+    title="Download Report",
+    url_path="download-report",
+    icon="📄"
+)
+
 
 # ==================================================
 # BACK BUTTON
