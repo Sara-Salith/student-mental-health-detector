@@ -430,8 +430,8 @@ def render_html(content):
 # TOP NAVIGATION
 # ==================================================
 
-nav1, nav2, nav3, nav4, nav5, nav6 = st.columns(
-    [2.4, 1, 1, 1.2, 1.1, 0.8]
+nav1, nav2, nav3 = st.columns(
+    [1, 1.2, 0.4]
 )
 
 
@@ -449,40 +449,58 @@ with nav1:
 with nav2:
 
     render_html(
-        '<div class="nav-pill">Dashboard</div>'
-    )
+        """
+        <div style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 5px;
+        ">
 
+            <div style="
+                height: 2px;
+                flex: 1;
+                background: linear-gradient(
+                    to right,
+                    transparent,
+                    #8b5cf6
+                );
+            "></div>
+
+            <div style="
+                padding: 10px 28px;
+                margin: 0 15px;
+                border-radius: 25px;
+                background: linear-gradient(
+                    135deg,
+                    #6366f1,
+                    #8b5cf6
+                );
+                color: white;
+                font-size: 17px;
+                font-weight: 700;
+                white-space: nowrap;
+                box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+            ">
+                📊 Dashboard
+            </div>
+
+            <div style="
+                height: 2px;
+                flex: 1;
+                background: linear-gradient(
+                    to left,
+                    transparent,
+                    #8b5cf6
+                );
+            "></div>
+
+        </div>
+        """
+    )
 
 with nav3:
-
-    if st.button(
-        "Assessment",
-        use_container_width=True,
-        key="nav_assessment"
-    ):
-        st.switch_page(assessment_page)
-
-
-with nav4:
-
-    if st.button(
-        "History",
-        use_container_width=True,
-        key="nav_history"
-    ):
-        st.switch_page(history_page)
-
-
-with nav5:
-
-    st.button(
-        "💡 Wellness",
-        use_container_width=True,
-        key="nav_wellness"
-    )
-
-
-with nav6:
 
     if st.button(
         "Logout",

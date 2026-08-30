@@ -5,9 +5,10 @@ import os
 
 from components.history import save_assessment
 from components.navigation import (
-    result_page,
     login_page,
+    assessment_page,
     dashboard_page,
+    result_page,
     back_button
 )
 
