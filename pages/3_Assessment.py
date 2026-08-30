@@ -513,25 +513,6 @@ st.html(f"""
 </div>
 """)
 
-# ============================================================
-# PROGRESS
-# ============================================================
-
-st.html("""
-<div class="progress-card">
-
-    <div class="progress-label">
-        <span>Assessment Progress</span>
-        <span>Step 4 of 4</span>
-    </div>
-
-    <div class="progress-track">
-        <div class="progress-fill"></div>
-    </div>
-
-</div>
-""")
-
 
 st.html("""
 <div class="privacy-card">
