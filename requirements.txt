@@ -5,3 +5,4 @@ scikit-learn
 google-genai
 reportlab
 supabase
+plotly
