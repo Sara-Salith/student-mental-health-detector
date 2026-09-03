@@ -521,44 +521,86 @@ with st.container(border=True):
 
 st.write("")
 
-
 with st.container(border=True):
 
-    st.markdown(
-        '<p class="section-heading">🧠 AI Wellness Analysis</p>',
-        unsafe_allow_html=True
+    st.markdown("## 🤖 AI Wellness Analysis")
+
+    st.caption(
+        "This tool provides an AI-based screening result for wellness "
+        "purposes and is not a medical diagnosis or clinical assessment. "
+        "Mental health is dynamic, and results are based on a snapshot "
+        "of self-reported data."
     )
 
+    st.divider()
 
-    # Generate analysis only once
+    # --------------------------------------------------
+    # GENERATE AI ANALYSIS
+    # --------------------------------------------------
 
     if "ai_result" not in st.session_state:
 
         with st.spinner(
-            "AI is analyzing your responses..."
+            "🤖 AI is analyzing your responses..."
         ):
 
             try:
 
-                st.session_state.ai_result = (
-                    get_ai_analysis(
-                        student_data,
-                        prediction
-                    )
+                result = get_ai_analysis(
+                    student_data,
+                    prediction
                 )
+
+                # Only save the result if Gemini actually
+                # returned useful content
+                if result and str(result).strip():
+
+                    st.session_state.ai_result = result
+
+                else:
+
+                    st.session_state.ai_result = None
 
             except Exception as e:
 
-                st.session_state.ai_result = (
-                    "AI wellness analysis could not "
-                    "be generated at this time."
-                )
+                st.session_state.ai_result = None
+
+                st.session_state.ai_error = str(e)
 
 
-    ai_result = st.session_state.ai_result
+    # --------------------------------------------------
+    # DISPLAY RESULT
+    # --------------------------------------------------
 
+    if st.session_state.get("ai_result"):
 
-    st.write(ai_result)
+        st.markdown(
+            st.session_state.ai_result
+        )
+
+    else:
+
+        st.warning(
+            "⚠️ AI wellness analysis could not be generated "
+            "right now. This may be a temporary AI service issue."
+        )
+
+        if st.button(
+            "🔄 Retry AI Analysis",
+            use_container_width=False
+        ):
+
+            st.session_state.pop(
+                "ai_result",
+                None
+            )
+
+            st.session_state.pop(
+                "ai_error",
+                None
+            )
+
+            st.rerun()
 
 
     st.divider()
