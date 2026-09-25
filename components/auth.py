@@ -10,13 +10,25 @@ import re
 @st.cache_resource
 def get_supabase():
 
-    supabase_url = st.secrets["supabase"]["url"]
-    supabase_key = st.secrets["supabase"]["key"]
+    try:
+        supabase_url = st.secrets["supabase"]["url"]
+        supabase_key = st.secrets["supabase"]["key"]
 
-    return create_client(
-        supabase_url,
-        supabase_key
-    )
+        if not supabase_url:
+            raise ValueError("Supabase URL is empty.")
+
+        if not supabase_key:
+            raise ValueError("Supabase key is empty.")
+
+        return create_client(
+            supabase_url,
+            supabase_key
+        )
+
+    except Exception as e:
+        raise RuntimeError(
+            f"Supabase connection failed: {type(e).__name__}: {e}"
+        )
 
 
 # ----------------------------------------
