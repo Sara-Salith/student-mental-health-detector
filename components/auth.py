@@ -177,6 +177,6 @@ def login_user(
 
         return False
 
-    except Exception:
-
+    except Exception as e:
+        print("LOGIN ERROR:", repr(e))
         return False
