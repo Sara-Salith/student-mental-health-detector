@@ -808,26 +808,8 @@ with right_col:
         '<div class="section-title">⚡ Quick Actions</div>'
     )
 
-
-    render_html(
-        """
-        <div class="action-card action-blue">
-
-            <div class="action-title">
-                🧠 Start Assessment
-            </div>
-
-            <div class="action-text">
-                Take a new mental wellness assessment and get an updated AI-powered analysis.
-            </div>
-
-        </div>
-        """
-    )
-
-
     if st.button(
-        "Start Assessment  →",
+        "🧠 Start Assessment ",
         key="action_assessment",
         use_container_width=True
     ):
@@ -837,26 +819,8 @@ with right_col:
 
     st.write("")
 
-
-    render_html(
-        """
-        <div class="action-card action-green">
-
-            <div class="action-title">
-                📊 View History
-            </div>
-
-            <div class="action-text">
-                Review your previous assessments, results and risk scores.
-            </div>
-
-        </div>
-        """
-    )
-
-
     if st.button(
-        "View History  →",
+        "📊 View History",
         key="action_history",
         use_container_width=True
     ):
@@ -866,26 +830,8 @@ with right_col:
 
     st.write("")
 
-
-    render_html(
-        """
-        <div class="action-card action-yellow">
-
-            <div class="action-title">
-                💡 Wellness Tips
-            </div>
-
-            <div class="action-text">
-                Get personalized suggestions based on your recent mental wellness status.
-            </div>
-
-        </div>
-        """
-    )
-
-
     if st.button(
-        "View Tips  →",
+        "💡View Wellness Tips",
         key="action_tips",
         use_container_width=True
     ):
