@@ -71,6 +71,34 @@ history_page = st.Page(
     icon="📋"
 )
 
+games_page = st.Page(
+    "pages/7_Wellness_Games.py",
+    title="Wellness Games",
+    url_path="wellness-games",
+    icon="🎮"
+)
+
+memory_match_page = st.Page(
+    "pages/8_Memory_Match.py",
+    title="Memory Match",
+    url_path="memory-match",
+    icon="🧠"
+)
+
+breathing_page = st.Page(
+    "pages/9_Breathing_Challenge.py",
+    title="Breathing Challenge",
+    url_path="breathing-challenge",
+    icon="🌬️"
+)
+
+mood_garden_page = st.Page(
+    "pages/10_Mood_Garden.py",
+    title="Mood Garden",
+    url_path="mood-garden",
+    icon="🌷"
+)
+
 
 # ==================================================
 # NAVIGATION
@@ -84,6 +112,10 @@ if st.session_state.logged_in:
             assessment_page,
             result_page,
             history_page,
+            games_page,
+            memory_match_page,
+            breathing_page,
+            mood_garden_page,
             download_report_page
         ],
         position="hidden"

@@ -55,7 +55,7 @@ download_report_page = st.Page(
 def back_button(page, key):
 
     if st.button(
-        "← Back",
+        "←",
         key=key,
         use_container_width=False
     ):

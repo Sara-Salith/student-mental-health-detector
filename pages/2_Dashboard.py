@@ -5,8 +5,7 @@ from components.history import get_user_history
 from components.navigation import (
     login_page,
     assessment_page,
-    history_page,
-    back_button
+    history_page
 )
 
 
@@ -32,8 +31,6 @@ if not st.session_state.get("logged_in", False):
 
 
 username = st.session_state.username
-back_button(login_page, "back_to_login")
-
 
 # ==================================================
 # LOAD HISTORY
@@ -896,6 +893,15 @@ with right_col:
         st.info(
             "Complete an assessment to receive personalized AI wellness recommendations."
         )
+
+    st.write("")
+
+    if st.button(
+        "🎮 Explore Games",
+        key="action_games",
+        use_container_width=True
+    ):
+        st.switch_page("pages/7_Wellness_Games.py")
 
 
     # ----------------------------------------------
