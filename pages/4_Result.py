@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.graph_objects as go
+import pandas as pd
 
 from ai_helper import get_ai_analysis
 from components.navigation import (
@@ -192,6 +193,8 @@ if (
 
 student_data = st.session_state.assessment_data
 
+shap_input = st.session_state.get("shap_input")
+
 prediction = st.session_state.prediction
 
 risk_score = float(
@@ -231,15 +234,6 @@ else:
 nav1, nav2, nav3, nav4 = st.columns(
     [1.2, 3, 1.3, 1.8]
 )
-
-
-with nav1:
-    if st.button(
-        "← Back",
-        key="top_back_button",
-        width="stretch"
-    ):
-        st.switch_page(assessment_page)
 
 
 with nav3:
@@ -284,46 +278,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-
-# ==================================================
-# SCREENING RESULT
-# ==================================================
-
-with st.container(border=True):
-
-    st.markdown(
-        '<p class="section-heading">🎯 Screening Result</p>',
-        unsafe_allow_html=True
-    )
-
-    if prediction == "Higher Mental Health Risk":
-
-        st.error(
-            "⚠️ Higher Mental Health Risk Detected"
-        )
-
-        st.write(
-            "The machine learning model has identified a higher "
-            "predicted risk based on the responses provided."
-        )
-
-    else:
-
-        st.success(
-            "✅ Lower Mental Health Risk Detected"
-        )
-
-        st.write(
-            "The machine learning model has identified a lower "
-            "predicted risk based on the responses provided."
-        )
-
-
-    st.info(
-        "ℹ️ This result is an AI-based screening prediction "
-        "and is not a medical diagnosis."
-    )
 
 
 # ==================================================
@@ -498,23 +452,264 @@ with st.container(border=True):
             )
 
 
+    # ==========================================
+    # DISCLAIMER
+    # ==========================================
+        
+    st.caption(
+        "The risk score is an AI-based estimate "
+        "calculated from your responses."
+        "This is not a medical diagnosis."
+        "Please consult a qualified professional "
+        "if you are experiencing distress."
+    )
+
+# ==================================================
+# PERSONALIZED AI RISK INSIGHTS
+# ==================================================
+
+st.write("")
+
+with st.container(border=True):
+
+    st.markdown("## 🔍 Personalized AI Risk Insights")
+
+    try:
+        import shap
+        import joblib
+        import pandas as pd
+
+        model = joblib.load("Model/mental_health_model.pkl")
+
+        background = joblib.load("Model/shap_background.pkl")
+
+        explainer = shap.LinearExplainer(model, background)
+        shap_explanation = explainer(shap_input)
+
+        values = shap_explanation.values[0]
+        features = shap_input.columns
+
+        # Map model feature names to original student-data keys
+        feature_mapping = {
+            "Gender": "Gender",
+            "Age": "Age",
+            "Academic Pressure": "Academic Pressure",
+            "CGPA": "CGPA",
+            "Study Satisfaction": "Study Satisfaction",
+            "Sleep Duration": "Sleep Duration",
+            "Dietary Habits": "Dietary Habits",
+            "Have you ever had suicidal thoughts ?": "Suicidal Thoughts",
+            "Work/Study Hours": "Work/Study Hours",
+            "Financial Stress": "Financial Stress",
+            "Family History of Mental Illness": "Family History"
+        }
+
+        # Retrieve original answers instead of encoded values
+        display_values = [
+            student_data[feature_mapping[feature]]
+            for feature in features
+        ]
+
+        insights = pd.DataFrame({
+            "Feature": features,
+            "Actual Value": display_values,
+            "Impact": values
+        })
+
+        # Exclude demographic features from displayed explanations
+        insights = insights[
+            ~insights["Feature"].isin(["Gender", "Age"])
+        ].copy()
+
+        positive = insights[insights["Impact"] > 0].sort_values(
+            "Impact", ascending=False
+        )
+
+        negative = insights[insights["Impact"] < 0].sort_values(
+            "Impact"
+        )
+
+        # ==========================================
+        # PREPARE SHAP INSIGHTS FOR GEMINI
+        # ==========================================
+
+        shap_insights = []
+
+        for _, row in insights.iterrows():
+
+            shap_insights.append({
+                "feature": row["Feature"],
+                "student_answer": row["Actual Value"],
+                "shap_contribution": round(float(row["Impact"]), 4),
+                "direction": (
+                    "Towards higher-risk prediction"
+                    if row["Impact"] > 0
+                    else "Towards lower-risk prediction"
+                    if row["Impact"] < 0
+                    else "No contribution"
+                )
+            })
+
+        # Store explanations for AI Wellness Analysis
+        st.session_state["shap_insights"] = shap_insights
+
+        # ==========================================
+        # FACTORS INCREASING PREDICTED RISK
+        # ==========================================
+
+        st.markdown("### 🔴 Factors increasing predicted risk")
+
+        if not positive.empty:
+
+            for _, row in positive.iterrows():
+
+                st.markdown(
+                f"**{row['Feature']}** — "
+                f"You entered **{row['Actual Value']}**. "
+                f"Contribution: **+{row['Impact']:.4f}** "
+                "towards the model's higher-risk output."
+            )
+
+        else:
+            st.write("No factors increased the predicted risk.")
+
+        # ==========================================
+        # FACTORS REDUCING PREDICTED RISK
+        # ==========================================
+
+        st.markdown("### 🟢 Factors reducing predicted risk")
+
+        if not negative.empty:
+
+            for _, row in negative.iterrows():
+
+                st.markdown(
+                f"**{row['Feature']}** — "
+                f"You entered **{row['Actual Value']}**. "
+                f"Contribution: **{row['Impact']:.4f}** "
+                "towards the model's lower-risk output."
+            )
+
+        else:
+            st.write("No factors reduced the predicted risk.")
+
+        # ==========================================
+        # DISCLAIMER
+        # ==========================================
+
+        st.caption(
+            "These explanations show how each input influenced "
+            "the model's prediction. They do not establish causation "
+            "or provide a medical diagnosis."
+        )
+
         st.write("")
 
+        # ==========================================
+        # VIEW SHAP CONTRIBUTION GRAPH
+        # ==========================================
 
-        with st.container(border=True):
+        with st.expander("📊 Click to View Contribution Graph", expanded=False):
 
-            st.markdown("### ✨ What does this mean?")
+            st.markdown("### SHAP Contribution Analysis")
 
-            st.write(
-                "The risk score is an AI-based estimate "
-                "calculated from your responses."
+            import plotly.express as px
+
+            chart_data = insights.sort_values(
+                "Impact",
+                ascending=True
             )
 
-            st.write(
-                "This is not a medical diagnosis. "
-                "Please consult a qualified professional "
-                "if you are experiencing distress."
+            fig = px.bar(
+                chart_data,
+                x="Impact",
+                y="Feature",
+                orientation="h",
+                color="Impact",
+                color_continuous_scale=[
+                    "#A8DDB5",
+                    "#DCEBFA",
+                    "#F4B6C2"
+                ],
+                hover_data=["Actual Value"],
+                labels={
+                    "Impact": "SHAP Contribution",
+                    "Feature": "Assessment Feature"
+                }
             )
+
+            fig.update_layout(
+                height=420,
+                showlegend=False,
+                coloraxis_showscale=False,
+                paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0)"
+            )
+
+            fig.add_vline(
+                x=0,
+                line_dash="dash",
+                line_color="#64748b"
+            )
+
+            st.plotly_chart(
+                fig,
+                use_container_width=True
+            )
+
+            st.caption(
+                "Positive values move the prediction towards Class 1; "
+                "negative values move it towards Class 0. "
+                "SHAP values are not percentages."
+            )
+
+    except Exception as e:
+
+        st.warning(
+            "Personalized insights could not be generated."
+        )
+
+        st.code(str(e))
+
+# ==================================================
+# SUICIDAL THOUGHTS - SAFETY SUPPORT
+# ==================================================
+
+if student_data.get("Suicidal Thoughts") == "Yes":
+
+    with st.container(border=True):
+
+        st.markdown("## ❤️ Your Safety and Well-being Matter")
+
+        st.warning(
+            "You mentioned experiencing suicidal thoughts. "
+            "You deserve support, and you do not have to face "
+            "these feelings alone."
+        )
+
+        st.markdown("""
+        **Please consider taking these steps:**
+
+        - Reach out to someone you trust, such as a family member,
+          friend, teacher or college counsellor.
+        - Consider speaking with a qualified mental health professional.
+        - If you feel you might act on these thoughts or are in
+          immediate danger, seek emergency help now.
+        """)
+
+        st.markdown("""
+        **Support services in India:**
+
+        - Tele-MANAS: **14416**
+        - Emergency assistance: **112**
+        """)
+
+        st.caption(
+            "This support guidance is displayed independently "
+            "of the machine learning prediction. Your safety matters "
+            "regardless of your screening result."
+        )
+            
 # ==================================================
 # AI WELLNESS ANALYSIS
 # ==================================================
@@ -523,105 +718,121 @@ st.write("")
 
 with st.container(border=True):
 
+    # ==========================================
+    # SECTION HEADER
+    # ==========================================
+
     st.markdown("## 🤖 AI Wellness Analysis")
 
     st.caption(
-        "This tool provides an AI-based screening result for wellness "
-        "purposes and is not a medical diagnosis or clinical assessment. "
-        "Mental health is dynamic, and results are based on a snapshot "
-        "of self-reported data."
+        "Personalized wellness guidance based on your "
+        "assessment responses and AI analysis."
     )
 
-    st.divider()
+    # ==========================================
+    # SHOW / HIDE BUTTON
+    # ==========================================
 
-    # --------------------------------------------------
-    # GENERATE AI ANALYSIS
-    # --------------------------------------------------
+    if "show_ai_analysis" not in st.session_state:
+       st.session_state["show_ai_analysis"] = False
 
-    if "ai_result" not in st.session_state:
 
-        with st.spinner(
-            "🤖 AI is analyzing your responses..."
-        ):
+    def toggle_ai_analysis():
+        st.session_state["show_ai_analysis"] = not st.session_state["show_ai_analysis"]
 
-            try:
 
-                result = get_ai_analysis(
-                    student_data,
-                    prediction
-                )
+    st.button(
+        "🔽 Hide AI Wellness Analysis"
+        if st.session_state["show_ai_analysis"]
+        else "🤖 Click to View AI Wellness Analysis",
+        key="toggle_ai_analysis",
+        on_click=toggle_ai_analysis,
+        use_container_width=True
+    )
 
-                # Only save the result if Gemini actually
-                # returned useful content
-                if result and str(result).strip():
+    # ==========================================
+    # GENERATE AND DISPLAY ANALYSIS
+    # ==========================================
 
-                    st.session_state.ai_result = result
+    if st.session_state.get("show_ai_analysis", False):
 
-                else:
+        st.divider()
+
+        if "ai_result" not in st.session_state:
+
+            with st.spinner(
+                "🤖 AI is analyzing your responses..."
+            ):
+
+                try:
+
+                    result = get_ai_analysis(
+                        student_data,
+                        prediction,
+                        st.session_state.get("shap_insights", [])
+                    )
+
+                    if result and str(result).strip():
+
+                        st.session_state.ai_result = result
+
+                    else:
+
+                        st.session_state.ai_result = None
+
+                except Exception as e:
 
                     st.session_state.ai_result = None
+                    st.session_state.ai_error = str(e)
 
-            except Exception as e:
+        # ======================================
+        # DISPLAY RESULT
+        # ======================================
 
-                st.session_state.ai_result = None
+        if st.session_state.get("ai_result"):
 
-                st.session_state.ai_error = str(e)
+            st.markdown(
+                st.session_state.ai_result
+            )
 
+        else:
 
-    # --------------------------------------------------
-    # DISPLAY RESULT
-    # --------------------------------------------------
+            st.warning(
+                "⚠️ AI wellness analysis could not be generated "
+                "right now. This may be a temporary AI service issue."
+            )
 
-    if st.session_state.get("ai_result"):
+            if st.button(
+                "🔄 Retry AI Analysis",
+                key="retry_ai_analysis"
+            ):
+
+                st.session_state.pop("ai_result", None)
+                st.session_state.pop("ai_error", None)
+
+                st.rerun()
+
+        st.divider()
+
+        # ======================================
+        # DISCLAIMER
+        # ======================================
 
         st.markdown(
-            st.session_state.ai_result
+            """
+            <div class="disclaimer">
+
+            <b>Disclaimer:</b>
+
+            This tool provides AI-based wellness guidance
+            and is not a medical diagnosis or clinical assessment.
+            Mental health is dynamic, and results are based
+            on a snapshot of self-reported data.
+
+            </div>
+            """,
+            unsafe_allow_html=True
         )
-
-    else:
-
-        st.warning(
-            "⚠️ AI wellness analysis could not be generated "
-            "right now. This may be a temporary AI service issue."
-        )
-
-        if st.button(
-            "🔄 Retry AI Analysis",
-            use_container_width=False
-        ):
-
-            st.session_state.pop(
-                "ai_result",
-                None
-            )
-
-            st.session_state.pop(
-                "ai_error",
-                None
-            )
-
-            st.rerun()
-
-
-    st.divider()
-
-
-    st.markdown(
-        """
-        <div class="disclaimer">
-
-        <b>Disclaimer:</b>
-
-        This tool provides an AI-based screening result
-        for wellness purposes and is not a medical diagnosis
-        or clinical assessment. Mental health is dynamic,
-        and results are based on a snapshot of self-reported data.
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
 
 # ==================================================
 # BOTTOM NAVIGATION

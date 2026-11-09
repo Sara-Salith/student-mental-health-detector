@@ -64,7 +64,7 @@ Even when a screening result indicates lower risk, mental wellbeing can change o
 # GEMINI AI ANALYSIS
 # ============================================================
 
-def get_ai_analysis(student_data, prediction):
+def get_ai_analysis(student_data, prediction, shap_insights=None):
 
     # --------------------------------------------------------
     # GET API KEY
@@ -85,6 +85,17 @@ def get_ai_analysis(student_data, prediction):
         api_key=api_key
     )
 
+    shap_insights = shap_insights or []
+
+    shap_context = "\n".join(
+        f"- {item['feature']}: Student answer = {item['student_answer']}; "
+        f"SHAP contribution = {item['shap_contribution']:+.4f}; "
+        f"Direction = {item['direction']}"
+        for item in shap_insights
+    )
+
+    if not shap_context:
+        shap_context = "SHAP explanations are unavailable."
 
     # --------------------------------------------------------
     # PROMPT
@@ -97,9 +108,9 @@ The machine learning model predicted:
 
 {prediction}
 
-Student assessment data:
+SHAP contribution analysis:
 
-{student_data}
+{shap_context}
 
 Provide a supportive, simple and personalized wellness analysis.
 
@@ -117,7 +128,32 @@ Do not unnecessarily repeat sensitive information.
 
 ### 3. Practical Wellness Suggestions
 
-Provide 3 to 5 realistic and practical suggestions.
+Provide 3 to 5 personalized wellness recommendations based on
+the student's actual assessment answers and SHAP analysis.
+
+Prioritize areas that may benefit from attention, such as:
+
+- High academic pressure: Suggest study planning, time management,
+  and stress management techniques.
+- Insufficient sleep: Suggest realistic sleep routine improvements.
+- High financial stress: Suggest budgeting, scholarships,
+  or student financial support.
+- Unhealthy dietary habits: Suggest practical healthy eating habits.
+- Low study satisfaction: Suggest achievable academic goals
+  and improved study strategies.
+
+Only recommend actions relevant to the student's actual answers.
+Do not assume the student experiences every problem listed above.
+
+For each recommendation, include:
+
+1. Area of Concern
+2. Why It Deserves Attention
+3. Recommended Action
+4. A Small, Achievable First Step
+
+If multiple concerns are present, prioritize the most relevant ones.
+Avoid repetitive or generic advice.
 
 ### 4. When to Consider Reaching Out for Support
 
@@ -133,6 +169,14 @@ Important rules:
 - Do not use alarming language unnecessarily.
 - Do not shame or blame the student.
 - Keep the response concise and useful.
+- Use the SHAP contribution analysis to identify factors influencing the model prediction.
+- Do not invent or assume contributing factors that are not present in the SHAP analysis.
+- Positive SHAP values indicate movement towards the higher-risk class; negative values indicate movement towards the lower-risk class.
+- SHAP values are not percentages and do not establish causation.
+- Do not describe a factor as harmless simply because its SHAP contribution is negative.
+- Provide practical recommendations based on the student's actual answers.
+- Make recommendations specific to the student's needs rather than generic or identical for every student.
+- Do not mention Gender or Age in the explanation.
 """
 
 

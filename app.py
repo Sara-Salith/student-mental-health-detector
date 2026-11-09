@@ -20,6 +20,67 @@ st.set_page_config(
     layout="wide"
 )
 
+# ==================================================
+# MOBILE RESPONSIVE STYLING
+# ==================================================
+
+st.markdown("""
+<style>
+
+/* Improve spacing on mobile screens */
+@media (max-width: 768px) {
+
+    .block-container {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-top: 1rem !important;
+    }
+
+    /* Make headings fit smaller screens */
+    h1 {
+        font-size: 1.7rem !important;
+        line-height: 1.3 !important;
+    }
+
+    h2 {
+        font-size: 1.4rem !important;
+    }
+
+    h3 {
+        font-size: 1.15rem !important;
+    }
+
+    /* Keep buttons easy to tap */
+    .stButton > button,
+    .stFormSubmitButton > button {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    /* Make input fields easier to use */
+    .stTextInput input,
+    .stNumberInput input,
+    .stSelectbox,
+    .stTextArea textarea {
+        font-size: 16px !important;
+    }
+
+    /* Prevent tables from forcing a wide layout */
+    [data-testid="stDataFrame"],
+    [data-testid="stTable"] {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    /* Improve chat readability */
+    [data-testid="stChatMessage"] {
+        padding: 0.75rem !important;
+    }
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 
 # ==================================================
 # SESSION STATE

@@ -564,7 +564,7 @@ with col1:
 
     gender = st.selectbox(
         "Gender",
-        ["Male", "Female", "Other"],
+        ["Male", "Female"],
         help="Select your gender identity."
     )
 
@@ -631,33 +631,6 @@ with col2:
         value=3.0,
         step=0.5,
         help="How satisfied are you with your current studies?"
-    )
-
-
-col1, col2 = st.columns(2)
-
-
-with col1:
-
-    work_pressure = st.slider(
-        "Work Pressure",
-        min_value=0.0,
-        max_value=5.0,
-        value=3.0,
-        step=0.5,
-        help="Rate the pressure you experience from work or responsibilities."
-    )
-
-
-with col2:
-
-    job_satisfaction = st.slider(
-        "Job Satisfaction",
-        min_value=0.0,
-        max_value=5.0,
-        value=3.0,
-        step=0.5,
-        help="How satisfied are you with your work or career situation?"
     )
 
 
@@ -850,7 +823,7 @@ if st.button(
     # ========================================================
 
     gender_encoded = (
-        1 if gender == "Male" else 0
+        0 if gender == "Male" else 1
     )
 
 
@@ -863,9 +836,9 @@ if st.button(
 
 
     dietary_mapping = {
-        "Healthy": 0,
+        "Unhealthy": 0,
         "Moderate": 1,
-        "Unhealthy": 2
+        "Healthy": 2
     }
 
 
@@ -890,24 +863,34 @@ if st.button(
 
 
     # ========================================================
-    # 13 FEATURES
+    # 11 FEATURES
     # ========================================================
 
     input_data = pd.DataFrame([[
         gender_encoded,
         age,
         academic_pressure,
-        work_pressure,
         cgpa,
         study_satisfaction,
-        job_satisfaction,
-        sleep_encoded,
+            sleep_encoded,
         dietary_encoded,
         suicidal_encoded,
         work_study_hours,
         financial_stress,
         family_encoded
-    ]])
+    ]], columns=[
+        "Gender",
+        "Age",
+        "Academic Pressure",
+        "CGPA",
+        "Study Satisfaction",
+        "Sleep Duration",
+        "Dietary Habits",
+        "Have you ever had suicidal thoughts ?",
+        "Work/Study Hours",
+        "Financial Stress",
+        "Family History of Mental Illness"
+    ])
 
 
     # ========================================================
@@ -923,6 +906,8 @@ if st.button(
             prediction = model.predict(
                 input_data
             )[0]
+
+            st.session_state["shap_input"] = input_data.copy()
 
 
             # ==================================================
@@ -1023,17 +1008,11 @@ if st.button(
                 "Academic Pressure":
                     academic_pressure,
 
-                "Work Pressure":
-                    work_pressure,
-
                 "CGPA":
                     cgpa,
 
                 "Study Satisfaction":
                     study_satisfaction,
-
-                "Job Satisfaction":
-                    job_satisfaction,
 
                 "Sleep Duration":
                     sleep_duration,
