@@ -6,3 +6,4 @@ google-genai
 reportlab
 supabase
 plotly
+shap==0.48.0
